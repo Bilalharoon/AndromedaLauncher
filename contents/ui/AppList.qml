@@ -107,6 +107,30 @@ ScrollView {
       width: 15 * PlasmaCore.Units.devicePixelRatio
       height: width
       visible: main.showAllApps
+
+       property var stateDescriptors: { 
+        
+        var categories = [
+          {
+            name: "all",
+            index: 2,
+            icon: 'icons/feather/file-text.svg'
+          }
+
+       ];
+        var mdl = rootModel;
+       var data = mdl.data(3).name
+        // console.log(data)
+       for (var i = 3; i < mdl.count; i++) {
+        categories.push({
+          name: mdl.roleForRow(i),
+          index: i,
+          icon: 'icons/feather/image.svg'
+
+        });
+       }
+        return categories;
+       }
       //I don't like it this way but I have to assign custom images anyways, so it's not too bad... right?
       states: [
       State {
@@ -115,8 +139,8 @@ ScrollView {
         PropertyChanges { target: sortingImage; source: 'icons/feather/file-text.svg'}
       },
       State {
-        name: "dev";
-        PropertyChanges { target: sortingLabel; text: i18n("Developement")}
+        name: sortingImage.stateDescriptors[1].name;
+        PropertyChanges { target: sortingLabel; text: i18n(sortingImage.stateDescriptors[1].name)}
         PropertyChanges { target: sortingImage; source: 'icons/feather/code.svg'}
         PropertyChanges { target: (currentStateIndex % 2 == 0 ? categoriesRepeater : categoriesRepeater2); model: rootModel.modelForRow(3)}
       },
@@ -213,7 +237,13 @@ ScrollView {
           } else if (currentStateIndex < 0) {
             currentStateIndex = sortingImage.states.length - 1
           }
-          sortingImage.state = sortingImage.states[currentStateIndex].name
+
+          var currentCategory = sortingImage.stateDescriptors[currentStateIndex];
+          //sortingImage.state = sortingImage.states[currentStateIndex].name
+          sortingLabel.text = currentCategory.name;
+
+          console.log(currentCategory)
+          sortingImage.source = currentCategory.icon
         }
       }
       ColorOverlay {
