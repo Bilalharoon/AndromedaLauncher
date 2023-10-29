@@ -102,30 +102,36 @@ ScrollView {
       }
     }
 
-    Image {
+
+    PlasmaCore.IconItem {
       id: sortingImage
       width: 15 * PlasmaCore.Units.devicePixelRatio
       height: width
       visible: main.showAllApps
+      source: rootModel.data(rootModel.index(2, 0), Qt.DecorationRole);
 
        property var stateDescriptors: { 
         
         var categories = [
           {
-            name: "all",
+            name: "All",
             index: 2,
-            icon: 'icons/feather/file-text.svg'
+            icon: rootModel.data(rootModel.index(2, 0), Qt.DecorationRole)
           }
 
        ];
         var mdl = rootModel;
-       var data = mdl.data(3).name
+       //var data = mdl.data(3).name
         // console.log(data)
+        var categoryName;
+        var categoryIcon;
        for (var i = 3; i < mdl.count; i++) {
+        categoryName  = mdl.data(rootModel.index(i, 0), Qt.DisplayRole);
+        categoryIcon  = mdl.data(rootModel.index(i, 0), Qt.DecorationRole);
         categories.push({
-          name: mdl.roleForRow(i),
+          name: categoryName,
           index: i,
-          icon: 'icons/feather/image.svg'
+          icon: categoryIcon
 
         });
        }
@@ -239,19 +245,21 @@ ScrollView {
           }
 
           var currentCategory = sortingImage.stateDescriptors[currentStateIndex];
-          //sortingImage.state = sortingImage.states[currentStateIndex].name
-          sortingLabel.text = currentCategory.name;
+          var choosenRepeater = (currentStateIndex % 2 == 0) ? categoriesRepeater : categoriesRepeater2;
 
-          console.log(currentCategory)
-          sortingImage.source = currentCategory.icon
+          console.log(currentCategory.icon)
+
+          sortingLabel.text = currentCategory.name;
+          sortingImage.source = currentCategory.icon;
+          choosenRepeater.model = rootModel.modelForRow(currentCategory.index);
         }
       }
-      ColorOverlay {
-        visible: plasmoid.configuration.theming != 0
-        anchors.fill: sortingImage
-        source: sortingImage
-        color: main.textColor
-      }
+      // ColorOverlay {
+      //   visible: plasmoid.configuration.theming != 0
+      //   anchors.fill: sortingImage
+      //   source: sortingImage
+      //   color: main.textColor
+      // }
     }
     Item { //Spacer
       id: spacer
@@ -279,12 +287,12 @@ ScrollView {
         }
         states: [
         State {
-          name: "hidden"; when: (sortingImage.state != 'all')
+          name: "hidden"; when: (sortingLabel.text != 'All')
           PropertyChanges { target: allAppsGrid; opacity: 0.0 }
           PropertyChanges { target: allAppsGrid; x: (!isRight ? -20 * PlasmaCore.Units.devicePixelRatio : 0) }
         },
         State {
-          name: "shown"; when: (sortingImage.state == 'all')
+          name: "shown"; when: (sortingLabel.text == 'All')
           PropertyChanges { target: allAppsGrid; opacity: 1.0 }
           PropertyChanges { target: allAppsGrid; x: -10 }
         }]
